@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+
+  "name": "Discover",
+  "description": "This extension will track the time you spend on websites.",
+  "version": "1.0",
+
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+
+  "permissions": [
+    "idle",
+    "tabs"
+  ]
+}
