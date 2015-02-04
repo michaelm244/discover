@@ -52,23 +52,29 @@ var Discover = {
   serverIp: "104.131.5.95:9292",
   dataPath: "/data_post",
 
-  handleXHRStateChange: function() {
-    console.log("xhr state changed cuh");
-  },
-
   sendStats: function() {
+    console.log("sending stats!!");
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = this.handleXHRStateChange;
-    xhr.open("POST", this.serverIp + this.dataPath, true);
+    xhr.onreadystatechange = function() {
+      console.log("state changed. new ready state: " + xhr.readyState);
+      if (xhr.readyState == 4) {
+        console.log("ready state is 4, status is: " + xhr.status);
+      }
+    };
+    var serverAddress = "http://" + this.serverIp + this.dataPath;
+    xhr.open("POST", serverAddress, true);
     xhr.send(JSON.stringify(localStorage));
+    var timeNow = Date.now();
+    localStorage.timeDataSent = ""+timeNow;
   },
 
   checkToSendStats: function() {
+    console.log("checking to send stats!");
     var timeNow = Date.now();
     var lastSaved = parseInt(localStorage.timeDataSent,10);
     var diff = timeNow - lastSaved;
     if (diff > this.sendStatsInterval) {
-      sendStats();
+      this.sendStats();
     }
   },
 
@@ -188,8 +194,8 @@ var Discover = {
     });
 
     chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-      console.log("a tab has been updated!");
       if(changeInfo.status == "complete" && tab.active) {
+        console.log("active tab has been fully loaded, updating");
         that.updateStats();
       }
     });
@@ -198,7 +204,7 @@ var Discover = {
     chrome.idle.onStateChanged.addListener(this.checkIdleTime);
 
     // try to send stats every 5 minutes
-    window.setInterval(this.checkToSendStats, this.checkDataSendInterval);
+    window.setInterval(this.checkToSendStats.bind(this), this.checkDataSendInterval);
 
   },
 
