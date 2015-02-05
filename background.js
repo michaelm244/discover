@@ -109,7 +109,7 @@ var Discover = {
     function(tabArr) {
       if(tabArr) {
         var currTab = tabArr[0];
-        that.currentURL = that.stripParameters(currTab.url);
+        that.currentURL = that.prepareURL(currTab.url);
         console.log("updating current URL to: "+that.currentURL);
         Timer.start();
       }
@@ -146,8 +146,8 @@ var Discover = {
       function(tabArr) {
         if(tabArr) {
           var currTab = tabArr[0];
-          that.currentURL = that.stripParameters(currTab.url);
-          console.log("url from func: " + that.stripParameters(currTab.url));
+          that.currentURL = that.prepareURL(currTab.url);
+          console.log("url from func: " + that.prepareURL(currTab.url));
           Timer.start();
         }
       });
@@ -217,9 +217,28 @@ var Discover = {
     }
   },
 
-  // TODO
-  domainIsIgnored: function(domain) {
-    return false;
+  prepareURL: function(url) {
+    url = this.stripParameters(url);
+    url = new URL(url);
+    var afterProtocol = url.href.split(url.protocol + "//")[1];
+    var afterSlashArr = afterProtocol.split("/");
+    var hash = "/";
+    if(afterSlashArr[1]) {
+      hash += this.hashCode(afterSlashArr.slice(1).join('/'));
+    }
+    var finalURL = url.protocol + "//" + url.hostname + hash;
+    return finalURL;
+  },
+
+  hashCode: function(str){
+    var hash = 0;
+    if (str.length == 0) return hash;
+    for (i = 0; i < str.length; i++) {
+      char = str.charCodeAt(i);
+      hash = ((hash<<5)-hash)+char;
+      hash = hash & hash;
+    }
+    return hash;
   },
 
   stripParameters: function(url) {
