@@ -262,6 +262,13 @@ var Discover = {
   }
 };
 
+chrome.runtime.onInstalled.addListener(function(details){
+  if(details.reason == "update"){
+    // clear localStorage on update
+    localStorage.clear();
+  }
+});
+
 // starting the app
 setTimeout(function() {
   Discover.initialize();
