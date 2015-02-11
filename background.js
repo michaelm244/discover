@@ -137,6 +137,13 @@ var Discover = {
   initialize: function() {
     console.log("initializing");
 
+    var currVersion = chrome.app.getDetails().version;
+    var prevVersion = localStorage['version'];
+    if(currVersion != prevVersion) {
+      localStorage.clear();
+      localStorage['version']= currVersion;
+    }
+
     if(!localStorage.user_id) {
       localStorage.user_id = Math.random().toString(36).substring(7);
     }
@@ -261,13 +268,6 @@ var Discover = {
     return url.split("?")[0];
   }
 };
-
-chrome.runtime.onInstalled.addListener(function(details){
-  if(details.reason == "update"){
-    // clear localStorage on update
-    localStorage.clear();
-  }
-});
 
 // starting the app
 setTimeout(function() {
