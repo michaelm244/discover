@@ -46,11 +46,24 @@ var Timer =  {
 var Discover = {
   domainRegex: /^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i,
   currentURL: null,
+  currWidth: null,
+  currHeight: null,
   focusedWindowId: null,
   checkDataSendInterval: 1000 * 60 * 5, // 5 minutes
   sendStatsInterval: 1000 * 60 * 60 * 24, // 24 hours
   serverIp: "104.131.5.95:9292",
   dataPath: "/data_post",
+
+  randomChars: function()
+  {
+      var text = "";
+      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+      for( var i=0; i < 10; i++ )
+          text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+      return text;
+  },
 
   sendStats: function() {
     console.log("sending stats!!");
@@ -80,36 +93,40 @@ var Discover = {
 
   updateStats: function() {
     if(this.currentURL) {
-      console.log("yo im in update stats here's the domain: " + this.currentURL);
+      console.log("yo im in update stats here's the url: " + this.currentURL);
 
       Timer.stop();
       // calculate time difference from start time
       var timeSpent = Timer.getTime();
       var seconds = timeSpent / 1000;
 
-      // get current site data from local storage or init it
-      var currentSiteData;
-      if(localStorage[this.currentURL]) {
-        currentSiteData = JSON.parse(localStorage[this.currentURL]);
-      }
-      else {
-        currentSiteData = {"visits":[]};
+      var that = this;
+
+      var randomString = this.randomChars();
+
+      if(this.currentURL.charAt(this.currentURL.length-1) != "/") {
+        this.currentURL += "/";
       }
 
-      // insert this visit
-      currentSiteData.visits.push(seconds);
-
-      localStorage[this.currentURL] = JSON.stringify(currentSiteData);
+      var keyURL = this.currentURL + randomString;
+      var visitObject = {
+        time: seconds,
+        width: that.currWidth,
+        height: that.currHeight
+      }
+      var stringJSON = JSON.stringify(visitObject);
+      localStorage[keyURL] = stringJSON;
     }
 
     Timer.clearTime();
-    var that = this;
     // update stuff for the new tab
     chrome.tabs.query({active: true, windowId: this.focusedWindowId},
     function(tabArr) {
       if(tabArr) {
         var currTab = tabArr[0];
         that.currentURL = that.prepareURL(currTab.url);
+        that.currWidth = currTab.width;
+        that.currHeight = currTab.height;
         console.log("updating current URL to: "+that.currentURL);
         Timer.start();
       }
@@ -119,9 +136,6 @@ var Discover = {
 
   initialize: function() {
     console.log("initializing");
-    if(!localStorage.data) {
-      localStorage.data = JSON.stringify({});
-    }
 
     if(!localStorage.user_id) {
       localStorage.user_id = Math.random().toString(36).substring(7);
@@ -147,6 +161,8 @@ var Discover = {
         if(tabArr) {
           var currTab = tabArr[0];
           that.currentURL = that.prepareURL(currTab.url);
+          that.currWidth = currTab.width;
+          that.currHeight = currTab.height;
           console.log("url from func: " + that.prepareURL(currTab.url));
           Timer.start();
         }
