@@ -54,6 +54,23 @@ var Discover = {
   serverIp: "104.131.5.95:9292",
   dataPath: "/data_post",
 
+  // clear local storage while keeping necessary variables
+  clearLocalStorage: function() {
+
+    var user_id, timeDataSent;
+    if(localStorage.user_id) {
+      user_id = localStorage.user_id;
+    }
+    if(localStorage.timeDataSent) {
+      timeDataSent = localStorage.timeDataSent;
+    }
+
+    localStorage.clear();
+
+    if(user_id) localStorage.user_id = user_id;
+    if(timeDataSent) localStorage.timeDataSent = timeDataSent;
+  },
+
   randomChars: function()
   {
       var text = "";
@@ -79,6 +96,9 @@ var Discover = {
     xhr.send(JSON.stringify(localStorage));
     var timeNow = Date.now();
     localStorage.timeDataSent = ""+timeNow;
+
+    // clear localStorage
+    this.clearLocalStorage();
   },
 
   checkToSendStats: function() {
@@ -138,10 +158,12 @@ var Discover = {
     console.log("initializing");
 
     var currVersion = chrome.app.getDetails().version;
-    var prevVersion = localStorage['version'];
+    var prevVersion = localStorage.version;
     if(currVersion != prevVersion) {
-      localStorage.clear();
-      localStorage['version']= currVersion;
+      // app was updated or first launched, we should clear localStorage
+      this.clearLocalStorage();
+
+      localStorage.version = currVersion;
     }
 
     if(!localStorage.user_id) {
