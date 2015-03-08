@@ -3,7 +3,7 @@
 
   "name": "Discover",
   "description": "This extension will track the time you spend on websites.",
-  "version": "1.0.3",
+  "version": "1.0.4",
 
   "background": {
     "scripts": ["background.js"]
