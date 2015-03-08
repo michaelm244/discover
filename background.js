@@ -53,6 +53,82 @@ var Discover = {
   sendStatsInterval: 1000 * 60 * 60 * 24, // 24 hours
   serverIp: "104.131.5.95:9292",
   dataPath: "/data_post",
+  reservedKeys: ["user_id", "timeDataSent", "version"],
+
+  isReservedKey: function(key) {
+    for(var i = 0; i < this.reservedKeys.length; i++) {
+      if(key == this.reservedKeys[i]) return true;
+    }
+    return false;
+  },
+
+  getFilteredStats: function() {
+    // first generate hash table with website visit times
+    var websiteTimes = {};
+    for(var key in localStorage) {
+      if(!localStorage.hasOwnProperty(key)) continue;
+
+      // check if key is a reserved key
+      if(this.isReservedKey(key)) continue;
+
+      // skip chrome pages (e.g settings page)
+      if(key.indexOf("chrome") == 0) continue;
+
+      // add website time to website times
+      var visitJSON;
+      try {
+        visitJSON = JSON.parse(localStorage[key]);
+      }
+      catch (e) {
+        console.log(e);
+      }
+
+      var visitTime = visitJSON.time;
+
+      // split key by slashes
+      var splitArr = key.split("/");
+
+      // remove last element (random characters) from splitArr
+      splitArr.splice(-1, 1);
+
+      // join new splitArr with slashes
+      var strippedKey = splitArr.join("/");
+
+      // add visitTime
+      var currentWebsiteTime = websiteTimes[strippedKey] || 0;
+      currentWebsiteTime += visitTime;
+
+      websiteTimes[strippedKey] = currentWebsiteTime;
+    }
+
+    var websiteTimesArr = [];
+
+    for(var key in websiteTimes) {
+      websiteTimesArr.push([key, websiteTimes[key]]);
+    }
+
+    websiteTimesArr.sort(function(a, b) {
+      a = a[1];
+      b = b[1];
+
+      return a < b ? -1 : (a > b ? 1 : 0);
+    });
+
+    // now find index of 90th percentile
+    var percentileIndex = Math.floor(websiteTimesArr.length * 0.8);
+
+    // filter out entries not above 80th percentile
+    websiteTimesArr.splice(0,percentileIndex);
+
+    var filteredWebsiteData = {};
+    for(var i = 0; i < websiteTimesArr.length; i++) {
+      filteredWebsiteData[websiteTimesArr[i][0]] = {
+        time: websiteTimesArr[i][1]
+      }
+    }
+
+    return filteredWebsiteData;
+  },
 
   // clear local storage while keeping necessary variables
   clearLocalStorage: function() {
@@ -93,7 +169,7 @@ var Discover = {
     };
     var serverAddress = "http://" + this.serverIp + this.dataPath;
     xhr.open("POST", serverAddress, true);
-    xhr.send(JSON.stringify(localStorage));
+    xhr.send(JSON.stringify(this.getFilteredStats()));
     var timeNow = Date.now();
     localStorage.timeDataSent = ""+timeNow;
 
@@ -265,13 +341,20 @@ var Discover = {
   prepareURL: function(url) {
     url = this.stripParameters(url);
     url = new URL(url);
+
+    var afterDomain = url.href.split(url.host)[1];
+    var hashedAfterDomain = this.hashCode(afterDomain);
+
+    var hashedDomain = this.hashCode(url.host);
+
+
     var afterProtocol = url.href.split(url.protocol + "//")[1];
     var afterSlashArr = afterProtocol.split("/");
     var hash = "/";
     if(afterSlashArr[1]) {
       hash += this.hashCode(afterSlashArr.slice(1).join('/'));
     }
-    var finalURL = url.protocol + "//" + url.hostname + hash;
+    var finalURL = url.protocol + "//" + hashedDomain + "/" + hashedAfterDomain;
     return finalURL;
   },
 
