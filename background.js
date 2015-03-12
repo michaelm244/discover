@@ -71,8 +71,8 @@ var Discover = {
       // check if key is a reserved key
       if(this.isReservedKey(key)) continue;
 
-      // skip chrome pages (e.g settings page)
-      if(key.indexOf("chrome") == 0) continue;
+      // skip chrome:// and file:// pages (e.g settings page)
+      if(key.indexOf("chrome") == 0 || key.indexOf("file") == 0) continue;
 
       // add website time to website times
       var visitJSON;
@@ -126,6 +126,9 @@ var Discover = {
         time: websiteTimesArr[i][1]
       }
     }
+
+    // add user_id to data
+    filteredWebsiteData["user_id"] = localStorage["user_id"]
 
     return filteredWebsiteData;
   },
@@ -218,7 +221,7 @@ var Discover = {
     // update stuff for the new tab
     chrome.tabs.query({active: true, windowId: this.focusedWindowId},
     function(tabArr) {
-      if(tabArr) {
+      if(tabArr.length > 0) {
         var currTab = tabArr[0];
         that.currentURL = that.prepareURL(currTab.url);
         that.currWidth = currTab.width;
@@ -263,7 +266,7 @@ var Discover = {
       // finding the first selected tab and setting stuff up
       chrome.tabs.query({active: true, windowId: currWindow.id},
       function(tabArr) {
-        if(tabArr) {
+        if(tabArr.length > 0) {
           var currTab = tabArr[0];
           that.currentURL = that.prepareURL(currTab.url);
           that.currWidth = currTab.width;
