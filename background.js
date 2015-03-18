@@ -65,6 +65,7 @@ var Discover = {
   getFilteredStats: function() {
     // first generate hash table with website visit times
     var websiteTimes = {};
+    var websiteVisits = {};
     for(var key in localStorage) {
       if(!localStorage.hasOwnProperty(key)) continue;
 
@@ -98,13 +99,18 @@ var Discover = {
       var currentWebsiteTime = websiteTimes[strippedKey] || 0;
       currentWebsiteTime += visitTime;
 
+      // add visit
+      var currentWebsiteVisits = websiteVisits[strippedKey] || 0;
+      currentWebsiteVisits++;
+
+      websiteVisits[strippedKey] = currentWebsiteVisits;
       websiteTimes[strippedKey] = currentWebsiteTime;
     }
 
     var websiteTimesArr = [];
 
     for(var key in websiteTimes) {
-      websiteTimesArr.push([key, websiteTimes[key]]);
+      websiteTimesArr.push([key, websiteTimes[key], websiteVisits[key]]);
     }
 
     websiteTimesArr.sort(function(a, b) {
@@ -123,7 +129,8 @@ var Discover = {
     var filteredWebsiteData = {};
     for(var i = 0; i < websiteTimesArr.length; i++) {
       filteredWebsiteData[websiteTimesArr[i][0]] = {
-        time: websiteTimesArr[i][1]
+        time: websiteTimesArr[i][1],
+        visits: websiteTimesArr[i][2]
       }
     }
 
@@ -216,6 +223,8 @@ var Discover = {
       var stringJSON = JSON.stringify(visitObject);
       localStorage[keyURL] = stringJSON;
     }
+
+    var that = this;
 
     Timer.clearTime();
     // update stuff for the new tab
