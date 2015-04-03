@@ -77,6 +77,7 @@ var Discover = {
 
       // add website time to website times
       var visitJSON;
+
       try {
         visitJSON = JSON.parse(localStorage[key]);
       }
@@ -95,16 +96,18 @@ var Discover = {
       // join new splitArr with slashes
       var strippedKey = splitArr.join("/");
 
+      var hashedURL = this.prepareURL(strippedKey);
+
       // add visitTime
-      var currentWebsiteTime = websiteTimes[strippedKey] || 0;
+      var currentWebsiteTime = websiteTimes[hashedURL] || 0;
       currentWebsiteTime += visitTime;
 
       // add visit
-      var currentWebsiteVisits = websiteVisits[strippedKey] || 0;
+      var currentWebsiteVisits = websiteVisits[hashedURL] || 0;
       currentWebsiteVisits++;
 
-      websiteVisits[strippedKey] = currentWebsiteVisits;
-      websiteTimes[strippedKey] = currentWebsiteTime;
+      websiteVisits[hashedURL] = currentWebsiteVisits;
+      websiteTimes[hashedURL] = currentWebsiteTime;
     }
 
     var websiteTimesArr = [];
@@ -232,7 +235,7 @@ var Discover = {
     function(tabArr) {
       if(tabArr.length > 0) {
         var currTab = tabArr[0];
-        that.currentURL = that.prepareURL(currTab.url);
+        that.currentURL = currTab.url;
         that.currWidth = currTab.width;
         that.currHeight = currTab.height;
         console.log("updating current URL to: "+that.currentURL);
@@ -277,10 +280,10 @@ var Discover = {
       function(tabArr) {
         if(tabArr.length > 0) {
           var currTab = tabArr[0];
-          that.currentURL = that.prepareURL(currTab.url);
+          that.currentURL = currTab.url;
           that.currWidth = currTab.width;
           that.currHeight = currTab.height;
-          console.log("url from func: " + that.prepareURL(currTab.url));
+          console.log("url from func: " + currTab.ur);
           Timer.start();
         }
       });
