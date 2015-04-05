@@ -46,8 +46,7 @@ var Timer =  {
 var Discover = {
   domainRegex: /^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i,
   currentURL: null,
-  currWidth: null,
-  currHeight: null,
+  currTitle: null,
   focusedWindowId: null,
   checkDataSendInterval: 1000 * 60 * 5, // 5 minutes
   sendStatsInterval: 1000 * 60 * 60 * 24, // 24 hours
@@ -146,18 +145,22 @@ var Discover = {
   // clear local storage while keeping necessary variables
   clearLocalStorage: function() {
 
-    var user_id, timeDataSent;
+    var user_id, timeDataSent, version;
     if(localStorage.user_id) {
       user_id = localStorage.user_id;
     }
     if(localStorage.timeDataSent) {
       timeDataSent = localStorage.timeDataSent;
     }
+    if(localStorage.version) {
+      version = localStorage.version;
+    }
 
     localStorage.clear();
 
     if(user_id) localStorage.user_id = user_id;
     if(timeDataSent) localStorage.timeDataSent = timeDataSent;
+    if(version) localStorage.version = version;
   },
 
   randomChars: function()
@@ -220,8 +223,7 @@ var Discover = {
       var keyURL = this.currentURL + randomString;
       var visitObject = {
         time: seconds,
-        width: that.currWidth,
-        height: that.currHeight
+        title: that.currTitle
       }
       var stringJSON = JSON.stringify(visitObject);
       localStorage[keyURL] = stringJSON;
@@ -236,8 +238,7 @@ var Discover = {
       if(tabArr.length > 0) {
         var currTab = tabArr[0];
         that.currentURL = currTab.url;
-        that.currWidth = currTab.width;
-        that.currHeight = currTab.height;
+        that.currTitle = currTab.title;
         console.log("updating current URL to: "+that.currentURL);
         Timer.start();
       }
@@ -281,8 +282,7 @@ var Discover = {
         if(tabArr.length > 0) {
           var currTab = tabArr[0];
           that.currentURL = currTab.url;
-          that.currWidth = currTab.width;
-          that.currHeight = currTab.height;
+          that.currTitle = currTab.title;
           console.log("url from func: " + currTab.ur);
           Timer.start();
         }

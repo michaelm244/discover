@@ -106,16 +106,20 @@
 
   SuggestionView = Backbone.View.extend({
     model: Suggestion,
+    className: 'suggestion',
     template: _.template($("#suggestion_template").html()),
     events: {
-      'click .yes': 'yesClicked',
-      'click .no': 'noClicked'
+      'click .recommend_question .yes': 'recommendYesClicked',
+      'click .recommend_question .no': 'recommendNoClicked'
     },
-    yesClicked: function() {
-      return alert("Yes clicked!");
+    recommendYesClicked: function() {
+      alert("Yes clicked!");
+      this.$el.find(".recommend_question").fadeOut();
+      return this.$el.find(".shared_question").css("display", "block");
     },
-    noClicked: function() {
-      return alert("No clicked!");
+    recommendNoClicked: function() {
+      alert("No clicked!");
+      return this.$el.fadeOut();
     },
     render: function() {
       this.$el.html(this.template(this.model.attributes));

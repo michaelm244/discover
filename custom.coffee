@@ -91,16 +91,20 @@ Suggestions = Backbone.Collection.extend
 
 SuggestionView = Backbone.View.extend
   model: Suggestion
+  className: 'suggestion'
   template: _.template $("#suggestion_template").html()
   events:
-    'click .yes': 'yesClicked'
-    'click .no': 'noClicked'
+    'click .recommend_question .yes': 'recommendYesClicked'
+    'click .recommend_question .no': 'recommendNoClicked'
 
-  yesClicked: () ->
+  recommendYesClicked: () ->
     alert "Yes clicked!"
+    @$el.find(".recommend_question").fadeOut()
+    @$el.find(".shared_question").css "display", "block"
 
-  noClicked: () ->
+  recommendNoClicked: () ->
     alert "No clicked!"
+    @$el.fadeOut()
 
   render: () ->
     @$el.html @template(@model.attributes)

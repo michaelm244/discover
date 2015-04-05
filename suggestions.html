@@ -4,17 +4,31 @@
     <meta charset="utf-8">
     <title>Discover Suggestions</title>
     <link href="bootstrap.css" rel="stylesheet">
+    <link href="custom.css" rel="stylesheet">
     <script src="underscore-min.js"></script>
     <script src="jquery.min.js"></script>
     <script src="backbone-min.js"></script>
   </head>
-  <body>
+  <body class="container">
+
   <script type="text/template" id="suggestion_template">
   <p>URL: <a href="<%= actualURL %>"><%= actualURL %></a></p>
-  <button class="yes">Yes</button>
-  <button class="no">No</button>
-  <br>
+
+  <div class="recommend_question">
+  <p>Would you recommend this link?</p>
+  <button class="yes btn btn-primary">Yes</button>
+  <button class="no btn btn-danger">No</button>
+  </div>
+
+  <div class="shared_question" style="display:none">
+  <p>Have you already shared this link on other social media?</p>
+  <button class="yes btn btn-primary">Yes</button>
+  <button class="no btn btn-danger">No</button>
+  </div>
+
+  <br><br>
   </script>
+
   <h1>Suggested Websites</h1>
   <div id="suggestions_container">
   </div>
