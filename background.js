@@ -65,6 +65,7 @@ var Discover = {
     // first generate hash table with website visit times
     var websiteTimes = {};
     var websiteVisits = {};
+    var websiteTitles = {};
     for(var key in localStorage) {
       if(!localStorage.hasOwnProperty(key)) continue;
 
@@ -105,6 +106,11 @@ var Discover = {
       var currentWebsiteVisits = websiteVisits[hashedURL] || 0;
       currentWebsiteVisits++;
 
+      // add title
+      if(!websiteTitles[hashedURL]) {
+        websiteTitles[hashedURL] = visitJSON.title;
+      }
+
       websiteVisits[hashedURL] = currentWebsiteVisits;
       websiteTimes[hashedURL] = currentWebsiteTime;
     }
@@ -112,7 +118,7 @@ var Discover = {
     var websiteTimesArr = [];
 
     for(var key in websiteTimes) {
-      websiteTimesArr.push([key, websiteTimes[key], websiteVisits[key]]);
+      websiteTimesArr.push([key, websiteTimes[key], websiteVisits[key], websiteTitles[key] ]);
     }
 
     websiteTimesArr.sort(function(a, b) {
@@ -132,7 +138,8 @@ var Discover = {
     for(var i = 0; i < websiteTimesArr.length; i++) {
       filteredWebsiteData[websiteTimesArr[i][0]] = {
         time: websiteTimesArr[i][1],
-        visits: websiteTimesArr[i][2]
+        visits: websiteTimesArr[i][2],
+        title: websiteTitles[i][3]
       }
     }
 
