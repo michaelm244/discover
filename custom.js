@@ -32,25 +32,20 @@
       return url.split("?")[0];
     };
     prepareURL = function(url) {
-      var afterDomain, afterProtocol, afterSlashArr, error, finalURL, hash, hashedAfterDomain, hashedDomain;
-      try {
-        url = stripParameters(url);
-        url = new URL(url);
-        afterDomain = url.href.split(url.host)[1];
-        hashedAfterDomain = hashCode(afterDomain);
-        hashedDomain = hashCode(url.host);
-        afterProtocol = url.href.split(url.protocol + "//")[1];
-        afterSlashArr = afterProtocol.split("/");
-        hash = "/";
-        if (afterSlashArr[1]) {
-          hash += hashCode(afterSlashArr.slice(1).join('/'));
-        }
-        finalURL = url.protocol + "//" + hashedDomain + "/" + hashedAfterDomain;
-        return finalURL;
-      } catch (_error) {
-        error = _error;
-        debugger;
+      var afterDomain, afterProtocol, afterSlashArr, finalURL, hash, hashedAfterDomain, hashedDomain;
+      url = stripParameters(url);
+      url = new URL(url);
+      afterDomain = url.href.split(url.host)[1];
+      hashedAfterDomain = hashCode(afterDomain);
+      hashedDomain = hashCode(url.host);
+      afterProtocol = url.href.split(url.protocol + "//")[1];
+      afterSlashArr = afterProtocol.split("/");
+      hash = "/";
+      if (afterSlashArr[1]) {
+        hash += hashCode(afterSlashArr.slice(1).join('/'));
       }
+      finalURL = url.protocol + "//" + hashedDomain + "/" + hashedAfterDomain;
+      return finalURL;
     };
     for (index = j = 0, ref = localStorage.length - 1; j <= ref; index = j += 1) {
       key = localStorage.key(index);
@@ -137,7 +132,6 @@
     var daCollection, daViews, parsedData;
     parsedData = JSON.parse(data);
     daCollection = new Suggestions(parsedData);
-    debugger;
     daViews = new SuggestionViews({
       collection: daCollection
     });
