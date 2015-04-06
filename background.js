@@ -73,7 +73,7 @@ var Discover = {
       if(this.isReservedKey(key)) continue;
 
       // skip chrome:// and file:// pages (e.g settings page)
-      if(key.indexOf("chrome") == 0 || key.indexOf("file") == 0) continue;
+      if(key.indexOf("chrome") == 0 || key.indexOf("file") == 0 || key.indexOf("about")) continue;
 
       // add website time to website times
       var visitJSON;
@@ -195,9 +195,6 @@ var Discover = {
     xhr.send(JSON.stringify(this.getFilteredStats()));
     var timeNow = Date.now();
     localStorage.timeDataSent = ""+timeNow;
-
-    // clear localStorage
-    this.clearLocalStorage();
   },
 
   checkToSendStats: function() {
@@ -259,8 +256,7 @@ var Discover = {
     var currVersion = chrome.app.getDetails().version;
     var prevVersion = localStorage.version;
     if(currVersion != prevVersion) {
-      // app was updated or first launched, we should clear localStorage
-      this.clearLocalStorage();
+      // new version
 
       localStorage.version = currVersion;
     }
