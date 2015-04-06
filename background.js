@@ -139,7 +139,7 @@ var Discover = {
       filteredWebsiteData[websiteTimesArr[i][0]] = {
         time: websiteTimesArr[i][1],
         visits: websiteTimesArr[i][2],
-        title: websiteTitles[i][3]
+        title: websiteTimesArr[i][3]
       }
     }
 
