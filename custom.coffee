@@ -28,25 +28,22 @@ hashedURLMap = (() ->
 
 
   prepareURL = (url) ->
-    try
-      url = stripParameters(url)
-      url = new URL(url)
+    url = stripParameters(url)
+    url = new URL(url)
 
-      afterDomain = url.href.split(url.host)[1]
-      hashedAfterDomain = hashCode(afterDomain)
+    afterDomain = url.href.split(url.host)[1]
+    hashedAfterDomain = hashCode(afterDomain)
 
-      hashedDomain = hashCode(url.host)
+    hashedDomain = hashCode(url.host)
 
-      afterProtocol = url.href.split(url.protocol + "//")[1]
-      afterSlashArr = afterProtocol.split("/")
-      hash = "/"
-      if afterSlashArr[1]
-        hash += hashCode(afterSlashArr.slice(1).join('/'))
+    afterProtocol = url.href.split(url.protocol + "//")[1]
+    afterSlashArr = afterProtocol.split("/")
+    hash = "/"
+    if afterSlashArr[1]
+      hash += hashCode(afterSlashArr.slice(1).join('/'))
 
-      finalURL = url.protocol + "//" + hashedDomain + "/" + hashedAfterDomain
-      return finalURL
-    catch error
-      debugger
+    finalURL = url.protocol + "//" + hashedDomain + "/" + hashedAfterDomain
+    return finalURL
 
   # loop through localStorage
   for index in [0..localStorage.length-1] by 1
@@ -117,11 +114,8 @@ SuggestionViews = Backbone.View.extend
 
 user_id = localStorage["user_id"]
 
-debugger
-
 $.ajax("http://104.131.5.95:9292/suggested_sites/"+user_id).done (data) ->
   parsedData = JSON.parse data
   daCollection = new Suggestions parsedData
-  debugger
   daViews = new SuggestionViews {collection: daCollection}
   daViews.render()

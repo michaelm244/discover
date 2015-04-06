@@ -73,7 +73,7 @@ var Discover = {
       if(this.isReservedKey(key)) continue;
 
       // skip chrome:// and file:// pages (e.g settings page)
-      if(key.indexOf("chrome") == 0 || key.indexOf("file") == 0 || key.indexOf("about")) continue;
+      if(key.indexOf("chrome") == 0 || key.indexOf("file") == 0 || key.indexOf("about") == 0) continue;
 
       // add website time to website times
       var visitJSON;
@@ -120,13 +120,6 @@ var Discover = {
     for(var key in websiteTimes) {
       websiteTimesArr.push([key, websiteTimes[key], websiteVisits[key], websiteTitles[key] ]);
     }
-
-    websiteTimesArr.sort(function(a, b) {
-      a = a[1];
-      b = b[1];
-
-      return a < b ? -1 : (a > b ? 1 : 0);
-    });
 
     // now find index of 90th percentile
     var percentileIndex = Math.floor(websiteTimesArr.length * 0.8);

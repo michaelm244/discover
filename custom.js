@@ -133,8 +133,6 @@
 
   user_id = localStorage["user_id"];
 
-  debugger;
-
   $.ajax("http://104.131.5.95:9292/suggested_sites/" + user_id).done(function(data) {
     var daCollection, daViews, parsedData;
     parsedData = JSON.parse(data);
