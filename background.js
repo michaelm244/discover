@@ -85,6 +85,8 @@ var Discover = {
         console.log(e);
       }
 
+      if(visitJSON["sent"]) continue;
+
       var visitTime = visitJSON.time;
 
       // split key by slashes
@@ -113,6 +115,10 @@ var Discover = {
 
       websiteVisits[hashedURL] = currentWebsiteVisits;
       websiteTimes[hashedURL] = currentWebsiteTime;
+
+      visitJSON["sent"] = true;
+
+      localStorage[key] = JSON.stringify(visitJSON);
     }
 
     var websiteTimesArr = [];

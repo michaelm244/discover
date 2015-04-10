@@ -9,7 +9,11 @@
     <script src="jquery.min.js"></script>
     <script src="backbone-min.js"></script>
   </head>
-  <body class="container">
+  <body>
+
+  <img src="loader.gif" id="loader">
+
+  <div class="container">
 
   <script type="text/template" id="suggestion_template">
   <h4><a href="<%= actualURL %>"><%= title %></a></h4>
@@ -32,6 +36,8 @@
 
   <h1>Suggested Websites</h1>
   <div id="suggestions_container">
+  </div>
+
   </div>
 
   <script src="custom.js"></script>

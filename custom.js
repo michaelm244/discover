@@ -87,20 +87,44 @@
 
   SuggestionView = Backbone.View.extend({
     model: Suggestion,
-    className: 'suggestion',
+    className: 'suggestion well',
     template: _.template($("#suggestion_template").html()),
     events: {
       'click .recommend_question .yes': 'recommendYesClicked',
-      'click .recommend_question .no': 'recommendNoClicked'
+      'click .recommend_question .no': 'recommendNoClicked',
+      'click .shared_question .yes': 'sharedYesClicked',
+      'click .shared_question .no': 'sharedNoClicked'
     },
     recommendYesClicked: function() {
-      alert("Yes clicked!");
+      console.log("Yes clicked!");
+      this.sendResponse("reccomend", "yes");
       this.$el.find(".recommend_question").fadeOut();
       return this.$el.find(".shared_question").css("display", "block");
     },
     recommendNoClicked: function() {
-      alert("No clicked!");
+      console.log("No clicked!");
+      this.sendResponse("reccomend", "no");
       return this.$el.fadeOut();
+    },
+    sharedYesClicked: function() {
+      console.log("Yes shared clicked");
+      this.sendResponse("shared", "yes");
+      return this.$el.fadeOut();
+    },
+    sharedNoClicked: function() {
+      console.log("No shared clicked");
+      this.sendResponse("shared", "no");
+      return this.$el.fadeOut();
+    },
+    sendResponse: function(question, answer) {
+      var data;
+      data = this.model.attributes;
+      data.question = question;
+      data.answer = answer;
+      return $.post("http://104.131.5.95:9292/feedback", data).done(function(response) {
+        console.log("got response from feedback");
+        return console.log(response);
+      });
     },
     render: function() {
       this.$el.html(this.template(this.model.attributes));
@@ -130,6 +154,7 @@
 
   $.ajax("http://104.131.5.95:9292/suggested_sites/" + user_id).done(function(data) {
     var daCollection, daViews, parsedData;
+    $("#loader").hide();
     parsedData = JSON.parse(data);
     daCollection = new Suggestions(parsedData);
     daViews = new SuggestionViews({

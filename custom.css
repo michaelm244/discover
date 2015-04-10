@@ -1,4 +1,12 @@
 .suggestion {
-  width: 50%;
+  width: 46%;
+  margin-right: 2%;
   display: inline-block;
+  word-wrap: break-word;
+}
+
+#loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
 }

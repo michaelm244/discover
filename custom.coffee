@@ -82,20 +82,43 @@ Suggestions = Backbone.Collection.extend
 
 SuggestionView = Backbone.View.extend
   model: Suggestion
-  className: 'suggestion'
+  className: 'suggestion well'
   template: _.template $("#suggestion_template").html()
   events:
     'click .recommend_question .yes': 'recommendYesClicked'
     'click .recommend_question .no': 'recommendNoClicked'
+    'click .shared_question .yes': 'sharedYesClicked'
+    'click .shared_question .no': 'sharedNoClicked'
 
   recommendYesClicked: () ->
-    alert "Yes clicked!"
+    console.log "Yes clicked!"
+    @sendResponse "recommend", "yes" 
     @$el.find(".recommend_question").fadeOut()
     @$el.find(".shared_question").css "display", "block"
 
   recommendNoClicked: () ->
-    alert "No clicked!"
+    console.log "No clicked!"
+    @sendResponse "recommend", "no"
     @$el.fadeOut()
+
+  sharedYesClicked: () ->
+    console.log "Yes shared clicked"
+    @sendResponse "shared", "yes"
+    @$el.fadeOut()
+
+
+  sharedNoClicked: () ->
+    console.log "No shared clicked"
+    @sendResponse "shared", "no"
+    @$el.fadeOut()
+
+  sendResponse: (question, answer) ->
+    data = @model.attributes
+    data.question = question
+    data.answer = answer
+    $.post("http://104.131.5.95:9292/feedback", data).done (response) ->
+      console.log "got response from feedback"
+      console.log response
 
   render: () ->
     @$el.html @template(@model.attributes)
@@ -115,6 +138,7 @@ SuggestionViews = Backbone.View.extend
 user_id = localStorage["user_id"]
 
 $.ajax("http://104.131.5.95:9292/suggested_sites/"+user_id).done (data) ->
+  $("#loader").hide()
   parsedData = JSON.parse data
   daCollection = new Suggestions parsedData
   daViews = new SuggestionViews {collection: daCollection}
