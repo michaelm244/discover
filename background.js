@@ -187,13 +187,16 @@ var Discover = {
       console.log("state changed. new ready state: " + xhr.readyState);
       if (xhr.readyState == 4) {
         console.log("ready state is 4, status is: " + xhr.status);
+        if(xhr.status == 200) {
+          // update status only if succesfully posted
+          var timeNow = Date.now();
+          localStorage.timeDataSent = ""+timeNow;
+        }
       }
     };
     var serverAddress = "http://" + this.serverIp + this.dataPath;
     xhr.open("POST", serverAddress, true);
     xhr.send(JSON.stringify(this.getFilteredStats()));
-    var timeNow = Date.now();
-    localStorage.timeDataSent = ""+timeNow;
   },
 
   checkToSendStats: function() {
