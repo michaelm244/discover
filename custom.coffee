@@ -75,7 +75,6 @@ Suggestions = Backbone.Collection.extend
   initialize: (data) ->
     for i in [0..data.length-1] by 1
       currValues = data[i]
-      currValues["actualURL"] = hashedURLMap[currValues["url"]]
       tempSuggestion = new Suggestion currValues
       @add tempSuggestion
 
@@ -137,9 +136,34 @@ SuggestionViews = Backbone.View.extend
 
 user_id = localStorage["user_id"]
 
+inWhiteList = (elem, whitelist) ->
+  for i in [0..whitelist.length-1] by 1
+    return true if whitelist[i] == elem
+  false
+
+filterData = (data, whitelistSites) ->
+  filteredData = []
+  for i in [0..data.length-1] by 1
+    entry = data[i]
+    url = hashedURLMap[entry["url"]]
+    entry["actualURL"] = url
+    urlObj = new URL(url)
+    hostname = urlObj.host
+    hostname = hostname.substring(4) if hostname.startsWith("www.")
+    passChecks = inWhiteList(hostname, whitelistSites) && urlObj.href != urlObj.origin
+    filteredData.push entry if passChecks
+  filteredData
+
+
+
+
 $.ajax("http://104.131.5.95:9292/suggested_sites/"+user_id).done (data) ->
-  $("#loader").hide()
-  parsedData = JSON.parse data
-  daCollection = new Suggestions parsedData
-  daViews = new SuggestionViews {collection: daCollection}
-  daViews.render()
+  $.ajax("http://104.131.5.95:9292/whitelist_sites").done (siteData) ->
+    $("#loader").hide()
+    whitelistSites = JSON.parse siteData
+    parsedData = JSON.parse data
+    filteredData = filterData parsedData, whitelistSites
+    daCollection = new Suggestions filteredData
+    debugger
+    daViews = new SuggestionViews {collection: daCollection}
+    daViews.render()
