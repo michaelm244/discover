@@ -116,9 +116,7 @@ var Discover = {
       websiteVisits[hashedURL] = currentWebsiteVisits;
       websiteTimes[hashedURL] = currentWebsiteTime;
 
-      visitJSON["sent"] = true;
-
-      localStorage[key] = JSON.stringify(visitJSON);
+      localStorage[key] = JSON.stringify({sent: true});
     }
 
     var websiteTimesArr = [];
