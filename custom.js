@@ -201,7 +201,7 @@
       if (hostname.startsWith("www.")) {
         hostname = hostname.substring(4);
       }
-      passChecks = inWhiteList(hostname, whitelistSites) && urlObj.href !== urlObj.origin;
+      passChecks = inWhiteList(hostname, whitelistSites) && urlObj.pathname !== "/";
       if (passChecks) {
         filteredData.push(entry);
       }
