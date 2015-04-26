@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>Discover Suggestions</title>
-    <link href="bootstrap.css" rel="stylesheet">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="custom.css" rel="stylesheet">
     <script src="underscore-min.js"></script>
     <script src="jquery.min.js"></script>
@@ -21,14 +21,24 @@
 
   <div class="recommend_question">
   <p>Would you recommend this link?</p>
-  <button class="yes btn btn-primary">Yes</button>
-  <button class="no btn btn-danger">No</button>
+  <button class="yes btn btn-primary">
+  <span class="glyphicon glyphicon-check" style="display:none"></span>
+  Yes</button>
+  
+  <button class="no btn btn-danger">
+  <span class="glyphicon glyphicon-check" style="display:none"></span>
+  No</button>
   </div>
 
   <div class="shared_question" style="display:none">
   <p>Have you already shared this link on other social media?</p>
-  <button class="yes btn btn-primary">Yes</button>
-  <button class="no btn btn-danger">No</button>
+  <button class="yes btn btn-primary">
+  <span class="glyphicon glyphicon-check" style="display:none"></span>
+  Yes</button>
+
+  <button class="no btn btn-danger">
+  <span class="glyphicon glyphicon-check" style="display:none"></span>
+  No</button>
   </div>
 
   <br><br>

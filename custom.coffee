@@ -82,6 +82,11 @@ Suggestions = Backbone.Collection.extend
 SuggestionView = Backbone.View.extend
   model: Suggestion
   className: 'suggestion well'
+
+  initialize: ->
+    @recommend_yes_clicked = false
+    @shared_yes_clicked = false
+
   template: _.template $("#suggestion_template").html()
   events:
     'click .recommend_question .yes': 'recommendYesClicked'
@@ -91,25 +96,60 @@ SuggestionView = Backbone.View.extend
 
   recommendYesClicked: () ->
     console.log "Yes clicked!"
-    @sendResponse "recommend", "yes" 
-    @$el.find(".recommend_question").fadeOut()
+    @sendResponse "recommend", "yes"
+    @$el.find(".recommend_question .yes").addClass("active")
+    @$el.find(".recommend_question .yes span").show()
+
+    if !@recommend_yes_clicked
+      # remove glypicon and active from no button
+      @$el.find(".recommend_question .no").removeClass("active")
+      @$el.find(".recommend_question .no span").hide()
+
+    @recommend_yes_clicked = true
     @$el.find(".shared_question").css "display", "block"
+
 
   recommendNoClicked: () ->
     console.log "No clicked!"
     @sendResponse "recommend", "no"
-    @$el.fadeOut()
+    @$el.find(".recommend_question .no").addClass("active")
+    @$el.find(".recommend_question .no span").show()
+
+    if @recommend_yes_clicked
+      # remove glypicon and active from yes button
+      @$el.find(".recommend_question .yes").removeClass("active")
+      @$el.find(".recommend_question .yes span").hide()
+
+    @recommend_yes_clicked = false
 
   sharedYesClicked: () ->
     console.log "Yes shared clicked"
     @sendResponse "shared", "yes"
-    @$el.fadeOut()
+    @$el.find(".shared_question .yes").addClass("active")
+    @$el.find(".shared_question .yes span").show()
+
+    if !@shared_yes_clicked
+      # remove glypicon and active from no button
+      @$el.find(".shared_question .no").removeClass("active")
+      @$el.find(".shared_question .no span").hide()
+
+
+    @shared_yes_clicked = true
 
 
   sharedNoClicked: () ->
     console.log "No shared clicked"
     @sendResponse "shared", "no"
-    @$el.fadeOut()
+    @$el.find(".shared_question .no").addClass("active")
+    @$el.find(".shared_question .no span").show()
+
+    if @shared_yes_clicked
+      # remove glypicon and active from yes button
+      @$el.find(".shared_question .yes").removeClass("active")
+      @$el.find(".shared_question .yes span").hide()
+
+
+    @shared_yes_clicked = false
 
   sendResponse: (question, answer) ->
     data = @model.attributes
@@ -164,6 +204,5 @@ $.ajax("http://104.131.5.95:9292/suggested_sites/"+user_id).done (data) ->
     parsedData = JSON.parse data
     filteredData = filterData parsedData, whitelistSites
     daCollection = new Suggestions filteredData
-    debugger
     daViews = new SuggestionViews {collection: daCollection}
     daViews.render()

@@ -87,6 +87,10 @@
   SuggestionView = Backbone.View.extend({
     model: Suggestion,
     className: 'suggestion well',
+    initialize: function() {
+      this.recommend_yes_clicked = false;
+      return this.shared_yes_clicked = false;
+    },
     template: _.template($("#suggestion_template").html()),
     events: {
       'click .recommend_question .yes': 'recommendYesClicked',
@@ -97,23 +101,47 @@
     recommendYesClicked: function() {
       console.log("Yes clicked!");
       this.sendResponse("recommend", "yes");
-      this.$el.find(".recommend_question").fadeOut();
+      this.$el.find(".recommend_question .yes").addClass("active");
+      this.$el.find(".recommend_question .yes span").show();
+      if (!this.recommend_yes_clicked) {
+        this.$el.find(".recommend_question .no").removeClass("active");
+        this.$el.find(".recommend_question .no span").hide();
+      }
+      this.recommend_yes_clicked = true;
       return this.$el.find(".shared_question").css("display", "block");
     },
     recommendNoClicked: function() {
       console.log("No clicked!");
       this.sendResponse("recommend", "no");
-      return this.$el.fadeOut();
+      this.$el.find(".recommend_question .no").addClass("active");
+      this.$el.find(".recommend_question .no span").show();
+      if (this.recommend_yes_clicked) {
+        this.$el.find(".recommend_question .yes").removeClass("active");
+        this.$el.find(".recommend_question .yes span").hide();
+      }
+      return this.recommend_yes_clicked = false;
     },
     sharedYesClicked: function() {
       console.log("Yes shared clicked");
       this.sendResponse("shared", "yes");
-      return this.$el.fadeOut();
+      this.$el.find(".shared_question .yes").addClass("active");
+      this.$el.find(".shared_question .yes span").show();
+      if (!this.shared_yes_clicked) {
+        this.$el.find(".shared_question .no").removeClass("active");
+        this.$el.find(".shared_question .no span").hide();
+      }
+      return this.shared_yes_clicked = true;
     },
     sharedNoClicked: function() {
       console.log("No shared clicked");
       this.sendResponse("shared", "no");
-      return this.$el.fadeOut();
+      this.$el.find(".shared_question .no").addClass("active");
+      this.$el.find(".shared_question .no span").show();
+      if (this.shared_yes_clicked) {
+        this.$el.find(".shared_question .yes").removeClass("active");
+        this.$el.find(".shared_question .yes span").hide();
+      }
+      return this.shared_yes_clicked = false;
     },
     sendResponse: function(question, answer) {
       var data;
@@ -189,7 +217,6 @@
       parsedData = JSON.parse(data);
       filteredData = filterData(parsedData, whitelistSites);
       daCollection = new Suggestions(filteredData);
-      debugger;
       daViews = new SuggestionViews({
         collection: daCollection
       });
