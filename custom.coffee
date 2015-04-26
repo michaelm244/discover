@@ -106,7 +106,7 @@ SuggestionView = Backbone.View.extend
       @$el.find(".recommend_question .no span").hide()
 
     @recommend_yes_clicked = true
-    @$el.find(".shared_question").css "display", "block"
+    @$el.find(".shared_question").show()
 
 
   recommendNoClicked: () ->
@@ -121,6 +121,7 @@ SuggestionView = Backbone.View.extend
       @$el.find(".recommend_question .yes span").hide()
 
     @recommend_yes_clicked = false
+    @$el.find(".shared_question").hide()
 
   sharedYesClicked: () ->
     console.log "Yes shared clicked"

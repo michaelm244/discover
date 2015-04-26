@@ -108,7 +108,7 @@
         this.$el.find(".recommend_question .no span").hide();
       }
       this.recommend_yes_clicked = true;
-      return this.$el.find(".shared_question").css("display", "block");
+      return this.$el.find(".shared_question").show();
     },
     recommendNoClicked: function() {
       console.log("No clicked!");
@@ -119,7 +119,8 @@
         this.$el.find(".recommend_question .yes").removeClass("active");
         this.$el.find(".recommend_question .yes span").hide();
       }
-      return this.recommend_yes_clicked = false;
+      this.recommend_yes_clicked = false;
+      return this.$el.find(".shared_question").hide();
     },
     sharedYesClicked: function() {
       console.log("Yes shared clicked");
