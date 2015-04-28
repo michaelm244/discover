@@ -53,6 +53,8 @@ hashedURLMap = (() ->
 
     continue if key.indexOf("chrome") == 0 || key.indexOf("file") == 0 || key.indexOf("about") == 0
 
+    continue if key.indexOf("view-source:") == 0
+
     splitArr = key.split("/")
 
     # remove last element (random characters) from splitArr
@@ -67,6 +69,15 @@ hashedURLMap = (() ->
 Suggestion = Backbone.Model.extend
   initialize: ->
     console.log "Suggestion created!"
+
+  fetchAnswers: ->
+    ajaxObj = $.ajax("http://104.131.5.95:9292/feedback?url=#{@.get("url")}&user_id=#{localStorage.user_id}")
+    ajaxObj.done (data) =>
+      console.log "got data"
+      console.log data
+      parsedData = JSON.parse data
+      @.set({"recommend_yes_clicked": parsedData[0], "shared_yes_clicked": parsedData[1]})
+    ajaxObj
 
 
 Suggestions = Backbone.Collection.extend
@@ -84,8 +95,6 @@ SuggestionView = Backbone.View.extend
   className: 'suggestion well'
 
   initialize: ->
-    @recommend_yes_clicked = false
-    @shared_yes_clicked = false
 
   template: _.template $("#suggestion_template").html()
   events:
@@ -94,46 +103,41 @@ SuggestionView = Backbone.View.extend
     'click .shared_question .yes': 'sharedYesClicked'
     'click .shared_question .no': 'sharedNoClicked'
 
+  changeState: (questionClassName, answerClassName) ->
+    @$el.find("#{questionClassName} #{answerClassName}").addClass("active")
+    @$el.find("#{questionClassName} #{answerClassName} span").show()
+
+    oppositeClassName = if answerClassName == ".yes" then ".no" else ".yes"
+
+    @$el.find("#{questionClassName} #{oppositeClassName}").removeClass("active")
+    @$el.find("#{questionClassName} #{oppositeClassName} span").hide()
+
+    answerBoolVal = if answerClassName == ".yes" then true else false
+    questionVal = if questionClassName == ".recommend_question" then "recommend_yes_clicked" else "shared_yes_clicked"
+    @model.set({questionVal: answerBoolVal})
+
   recommendYesClicked: () ->
     console.log "Yes clicked!"
     @sendResponse "recommend", "yes"
-    @$el.find(".recommend_question .yes").addClass("active")
-    @$el.find(".recommend_question .yes span").show()
+    
+    @changeState ".recommend_question", ".yes"
 
-    if !@recommend_yes_clicked
-      # remove glypicon and active from no button
-      @$el.find(".recommend_question .no").removeClass("active")
-      @$el.find(".recommend_question .no span").hide()
-
-    @recommend_yes_clicked = true
     @$el.find(".shared_question").show()
 
 
   recommendNoClicked: () ->
     console.log "No clicked!"
     @sendResponse "recommend", "no"
-    @$el.find(".recommend_question .no").addClass("active")
-    @$el.find(".recommend_question .no span").show()
+    
+    @changeState ".recommend_question", ".no"
 
-    if @recommend_yes_clicked
-      # remove glypicon and active from yes button
-      @$el.find(".recommend_question .yes").removeClass("active")
-      @$el.find(".recommend_question .yes span").hide()
-
-    @recommend_yes_clicked = false
     @$el.find(".shared_question").hide()
 
   sharedYesClicked: () ->
     console.log "Yes shared clicked"
     @sendResponse "shared", "yes"
-    @$el.find(".shared_question .yes").addClass("active")
-    @$el.find(".shared_question .yes span").show()
-
-    if !@shared_yes_clicked
-      # remove glypicon and active from no button
-      @$el.find(".shared_question .no").removeClass("active")
-      @$el.find(".shared_question .no span").hide()
-
+    
+    @changeState ".shared_question", ".yes"
 
     @shared_yes_clicked = true
 
@@ -141,14 +145,8 @@ SuggestionView = Backbone.View.extend
   sharedNoClicked: () ->
     console.log "No shared clicked"
     @sendResponse "shared", "no"
-    @$el.find(".shared_question .no").addClass("active")
-    @$el.find(".shared_question .no span").show()
-
-    if @shared_yes_clicked
-      # remove glypicon and active from yes button
-      @$el.find(".shared_question .yes").removeClass("active")
-      @$el.find(".shared_question .yes span").hide()
-
+    
+    @changeState ".shared_question", ".no"
 
     @shared_yes_clicked = false
 
@@ -162,18 +160,28 @@ SuggestionView = Backbone.View.extend
 
   render: () ->
     @$el.html @template(@model.attributes)
+    if @model.get("recommend_yes_clicked")
+      @changeState ".recommend_question", ".yes"
+
+    if @model.get("shared_yes_clicked")
+      @changeState ".shared_question", ".yes"
     @
 
 
 SuggestionViews = Backbone.View.extend
   el: "#suggestions_container"
+
+  insertElem: (collectionView, view) ->
+    collectionView.$el.append view.render().el
+
   render: ->
     console.log "suggestion views render called"
     for index in [0 .. @collection.length - 1] by 1
       suggestionModel = @collection.at index
       console.log "in each loop"
       tempSuggestionView = new SuggestionView({model: suggestionModel})
-      @$el.append tempSuggestionView.render().el
+      console.log suggestionModel
+      suggestionModel.fetchAnswers().done @insertElem(@, tempSuggestionView)
 
 user_id = localStorage["user_id"]
 
@@ -190,9 +198,10 @@ filterData = (data, whitelistSites) ->
     entry["actualURL"] = url
     urlObj = new URL(url)
     hostname = urlObj.host
-    hostname = hostname.substring(4) if hostname.startsWith("www.")
-    passChecks = inWhiteList(hostname, whitelistSites) && urlObj.pathname != "/"
-    filteredData.push entry if passChecks
+    if hostname?
+      hostname = hostname.substring(4) if hostname.startsWith("www.")
+      passChecks = inWhiteList(hostname, whitelistSites) && urlObj.pathname != "/"
+      filteredData.push entry if passChecks
   filteredData
 
 

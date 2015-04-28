@@ -55,6 +55,9 @@
       if (key.indexOf("chrome") === 0 || key.indexOf("file") === 0 || key.indexOf("about") === 0) {
         continue;
       }
+      if (key.indexOf("view-source:") === 0) {
+        continue;
+      }
       splitArr = key.split("/");
       splitArr.splice(-1, 1);
       strippedKey = splitArr.join("/");
@@ -66,6 +69,23 @@
   Suggestion = Backbone.Model.extend({
     initialize: function() {
       return console.log("Suggestion created!");
+    },
+    fetchAnswers: function() {
+      var ajaxObj;
+      ajaxObj = $.ajax("http://104.131.5.95:9292/feedback?url=" + (this.get("url")) + "&user_id=" + localStorage.user_id);
+      ajaxObj.done((function(_this) {
+        return function(data) {
+          var parsedData;
+          console.log("got data");
+          console.log(data);
+          parsedData = JSON.parse(data);
+          return _this.set({
+            "recommend_yes_clicked": parsedData[0],
+            "shared_yes_clicked": parsedData[1]
+          });
+        };
+      })(this));
+      return ajaxObj;
     }
   });
 
@@ -87,10 +107,7 @@
   SuggestionView = Backbone.View.extend({
     model: Suggestion,
     className: 'suggestion well',
-    initialize: function() {
-      this.recommend_yes_clicked = false;
-      return this.shared_yes_clicked = false;
-    },
+    initialize: function() {},
     template: _.template($("#suggestion_template").html()),
     events: {
       'click .recommend_question .yes': 'recommendYesClicked',
@@ -98,50 +115,41 @@
       'click .shared_question .yes': 'sharedYesClicked',
       'click .shared_question .no': 'sharedNoClicked'
     },
+    changeState: function(questionClassName, answerClassName) {
+      var answerBoolVal, oppositeClassName, questionVal;
+      this.$el.find(questionClassName + " " + answerClassName).addClass("active");
+      this.$el.find(questionClassName + " " + answerClassName + " span").show();
+      oppositeClassName = answerClassName === ".yes" ? ".no" : ".yes";
+      this.$el.find(questionClassName + " " + oppositeClassName).removeClass("active");
+      this.$el.find(questionClassName + " " + oppositeClassName + " span").hide();
+      answerBoolVal = answerClassName === ".yes" ? true : false;
+      questionVal = questionClassName === ".recommend_question" ? "recommend_yes_clicked" : "shared_yes_clicked";
+      return this.model.set({
+        questionVal: answerBoolVal
+      });
+    },
     recommendYesClicked: function() {
       console.log("Yes clicked!");
       this.sendResponse("recommend", "yes");
-      this.$el.find(".recommend_question .yes").addClass("active");
-      this.$el.find(".recommend_question .yes span").show();
-      if (!this.recommend_yes_clicked) {
-        this.$el.find(".recommend_question .no").removeClass("active");
-        this.$el.find(".recommend_question .no span").hide();
-      }
-      this.recommend_yes_clicked = true;
+      this.changeState(".recommend_question", ".yes");
       return this.$el.find(".shared_question").show();
     },
     recommendNoClicked: function() {
       console.log("No clicked!");
       this.sendResponse("recommend", "no");
-      this.$el.find(".recommend_question .no").addClass("active");
-      this.$el.find(".recommend_question .no span").show();
-      if (this.recommend_yes_clicked) {
-        this.$el.find(".recommend_question .yes").removeClass("active");
-        this.$el.find(".recommend_question .yes span").hide();
-      }
-      this.recommend_yes_clicked = false;
+      this.changeState(".recommend_question", ".no");
       return this.$el.find(".shared_question").hide();
     },
     sharedYesClicked: function() {
       console.log("Yes shared clicked");
       this.sendResponse("shared", "yes");
-      this.$el.find(".shared_question .yes").addClass("active");
-      this.$el.find(".shared_question .yes span").show();
-      if (!this.shared_yes_clicked) {
-        this.$el.find(".shared_question .no").removeClass("active");
-        this.$el.find(".shared_question .no span").hide();
-      }
+      this.changeState(".shared_question", ".yes");
       return this.shared_yes_clicked = true;
     },
     sharedNoClicked: function() {
       console.log("No shared clicked");
       this.sendResponse("shared", "no");
-      this.$el.find(".shared_question .no").addClass("active");
-      this.$el.find(".shared_question .no span").show();
-      if (this.shared_yes_clicked) {
-        this.$el.find(".shared_question .yes").removeClass("active");
-        this.$el.find(".shared_question .yes span").hide();
-      }
+      this.changeState(".shared_question", ".no");
       return this.shared_yes_clicked = false;
     },
     sendResponse: function(question, answer) {
@@ -156,12 +164,21 @@
     },
     render: function() {
       this.$el.html(this.template(this.model.attributes));
+      if (this.model.get("recommend_yes_clicked")) {
+        this.changeState(".recommend_question", ".yes");
+      }
+      if (this.model.get("shared_yes_clicked")) {
+        this.changeState(".shared_question", ".yes");
+      }
       return this;
     }
   });
 
   SuggestionViews = Backbone.View.extend({
     el: "#suggestions_container",
+    insertElem: function(collectionView, view) {
+      return collectionView.$el.append(view.render().el);
+    },
     render: function() {
       var index, j, ref, results, suggestionModel, tempSuggestionView;
       console.log("suggestion views render called");
@@ -172,7 +189,8 @@
         tempSuggestionView = new SuggestionView({
           model: suggestionModel
         });
-        results.push(this.$el.append(tempSuggestionView.render().el));
+        console.log(suggestionModel);
+        results.push(suggestionModel.fetchAnswers().done(this.insertElem(this, tempSuggestionView)));
       }
       return results;
     }
@@ -199,12 +217,14 @@
       entry["actualURL"] = url;
       urlObj = new URL(url);
       hostname = urlObj.host;
-      if (hostname.startsWith("www.")) {
-        hostname = hostname.substring(4);
-      }
-      passChecks = inWhiteList(hostname, whitelistSites) && urlObj.pathname !== "/";
-      if (passChecks) {
-        filteredData.push(entry);
+      if (hostname != null) {
+        if (hostname.startsWith("www.")) {
+          hostname = hostname.substring(4);
+        }
+        passChecks = inWhiteList(hostname, whitelistSites) && urlObj.pathname !== "/";
+        if (passChecks) {
+          filteredData.push(entry);
+        }
       }
     }
     return filteredData;

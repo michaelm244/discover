@@ -75,6 +75,8 @@ var Discover = {
       // skip chrome:// and file:// pages (e.g settings page)
       if(key.indexOf("chrome") == 0 || key.indexOf("file") == 0 || key.indexOf("about") == 0) continue;
 
+      if(key.indexOf("view-source:") == 0) continue;
+
       // add website time to website times
       var visitJSON;
 
