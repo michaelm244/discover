@@ -217,7 +217,7 @@
       entry["actualURL"] = url;
       urlObj = new URL(url);
       hostname = urlObj.host;
-      if (hostname) {
+      if (hostname && typeof hostname === "string") {
         if (hostname.startsWith("www.")) {
           hostname = hostname.substring(4);
         }
