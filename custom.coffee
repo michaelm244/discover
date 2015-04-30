@@ -198,7 +198,7 @@ filterData = (data, whitelistSites) ->
     entry["actualURL"] = url
     urlObj = new URL(url)
     hostname = urlObj.host
-    if hostname?
+    if hostname
       hostname = hostname.substring(4) if hostname.startsWith("www.")
       passChecks = inWhiteList(hostname, whitelistSites) && urlObj.pathname != "/"
       filteredData.push entry if passChecks
