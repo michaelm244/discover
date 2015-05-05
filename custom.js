@@ -198,6 +198,12 @@
 
   user_id = localStorage["user_id"];
 
+  if (typeof String.prototype.startsWith !== 'function') {
+    String.prototype.startsWith = function(str) {
+      return this.indexOf(str) === 0;
+    };
+  }
+
   inWhiteList = function(elem, whitelist) {
     var i, j, ref;
     for (i = j = 0, ref = whitelist.length - 1; j <= ref; i = j += 1) {

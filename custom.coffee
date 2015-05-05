@@ -185,6 +185,10 @@ SuggestionViews = Backbone.View.extend
 
 user_id = localStorage["user_id"]
 
+if typeof String.prototype.startsWith != 'function'
+  String.prototype.startsWith =  (str) ->
+    return this.indexOf(str) == 0
+
 inWhiteList = (elem, whitelist) ->
   for i in [0..whitelist.length-1] by 1
     return true if whitelist[i] == elem
