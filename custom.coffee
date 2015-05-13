@@ -200,12 +200,16 @@ filterData = (data, whitelistSites) ->
     entry = data[i]
     url = hashedURLMap[entry["url"]]
     entry["actualURL"] = url
-    urlObj = new URL(url)
-    hostname = urlObj.host
-    if hostname and typeof hostname == "string"
-      hostname = hostname.substring(4) if hostname.startsWith("www.")
-      passChecks = inWhiteList(hostname, whitelistSites) && urlObj.pathname != "/"
-      filteredData.push entry if passChecks
+    try
+      urlObj = new URL(url)
+      hostname = urlObj.host
+      if hostname and typeof hostname == "string"
+        hostname = hostname.substring(4) if hostname.startsWith("www.")
+        passChecks = inWhiteList(hostname, whitelistSites) && urlObj.pathname != "/"
+        filteredData.push entry if passChecks
+    catch error
+      console.log error
+      console.log "could not parse the url #{url}"
   filteredData
 
 

@@ -215,22 +215,28 @@
   };
 
   filterData = function(data, whitelistSites) {
-    var entry, filteredData, hostname, i, j, passChecks, ref, url, urlObj;
+    var entry, error, filteredData, hostname, i, j, passChecks, ref, url, urlObj;
     filteredData = [];
     for (i = j = 0, ref = data.length - 1; j <= ref; i = j += 1) {
       entry = data[i];
       url = hashedURLMap[entry["url"]];
       entry["actualURL"] = url;
-      urlObj = new URL(url);
-      hostname = urlObj.host;
-      if (hostname && typeof hostname === "string") {
-        if (hostname.startsWith("www.")) {
-          hostname = hostname.substring(4);
+      try {
+        urlObj = new URL(url);
+        hostname = urlObj.host;
+        if (hostname && typeof hostname === "string") {
+          if (hostname.startsWith("www.")) {
+            hostname = hostname.substring(4);
+          }
+          passChecks = inWhiteList(hostname, whitelistSites) && urlObj.pathname !== "/";
+          if (passChecks) {
+            filteredData.push(entry);
+          }
         }
-        passChecks = inWhiteList(hostname, whitelistSites) && urlObj.pathname !== "/";
-        if (passChecks) {
-          filteredData.push(entry);
-        }
+      } catch (_error) {
+        error = _error;
+        console.log(error);
+        console.log("could not parse the url " + url);
       }
     }
     return filteredData;
